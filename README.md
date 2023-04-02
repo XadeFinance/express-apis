@@ -1,6 +1,4 @@
-# Example Alchemy Notify Webhooks Server in Node
-
-A simple example webhook server for using Alchemy Notify that uses node express.
+# Alchemy Notify Webhooks Server in Node + V2
 
 ## Installation
 
@@ -30,7 +28,7 @@ Please change SIGNING_KEY to the signing key corresponding to your webhook, whic
 
 And just like that, you're done!
 
-NOTE: Your webhook path is currently set to "/webhook-path" in `src/index.ts`, but feel free to change it to whatever path you'd like.
+NOTE: Your webhook path is currently set to "/webhook" in `src/index.ts`, but feel free to change it to whatever path you'd like.
 
 ## Debugging
 
