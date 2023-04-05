@@ -133,17 +133,17 @@ catch(e)
     }
   })
 
-  app.post('/serverside', async (req:any, res:any) => {
+  app.get('/serverside', async (req:any, res:any) => {
     try {
       // Set the topic to send the notification to
 const topic = 'random';
-
+const { title, body } = req.body
 // Construct the notification message
 const message = {
   topic: topic,
   notification: {
-    title: 'Notification Title',
-    body: 'Notification Body',
+    title: title,
+    body: body,
   },
 };
 
@@ -155,6 +155,8 @@ admin.messaging().send(message)
   .catch((error:any) => {
     console.error('Error sending message:', error);
   });
+  return res.status(201).json({ message: 'The job is done' });
+
     }
     catch(e)
     {
