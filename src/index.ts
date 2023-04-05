@@ -44,7 +44,7 @@ db.once('open', () => console.log('Connected to mongoose'))
   setDefaultEnvVar("PORT", "3000");
   setDefaultEnvVar("HOST", "127.0.0.1");
   setDefaultEnvVar("SIGNING_KEY", "whsec_O8iFY5eJDnTuNxUF9KxesVkW");
-
+  setDefaultEnvVar("KEY", "")
   const port = Number(getRequiredEnvVar("PORT"));
   const host = getRequiredEnvVar("HOST");
   const signingKey = getRequiredEnvVar("SIGNING_KEY");
@@ -133,15 +133,17 @@ catch(e)
     }
   })
 
-  app.get('/serverside', async (req:any, res:any) => {
+  app.post('/serverside', async (req:any, res:any) => {
     try {
       // Set the topic to send the notification to
 const topic = 'random';
-const { title, body } = req.query
+const { title, body, key } = req.body
 // Construct the notification message
+if(key != getRequiredEnvVar("KEY"))  return res.status(400).json({ message: 'Wrong key' });
 const message = {
   topic: topic,
   notification: {
+    
     title: title,
     body: body,
   },
