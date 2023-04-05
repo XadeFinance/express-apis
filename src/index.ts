@@ -110,12 +110,14 @@ catch(e)
   console.log(e)
   res.send("error in try block")
 }});
-  app.post('/registerDevice', async (req, res) => {
+  app.post('/registerDevice', async (req:any, res:any) => {
     try {
       const { walletAddress, deviceToken } = req.body; 
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) { 
-        return res.status(400).json({ message: 'User already exists' });
+        existingUser.deviceToken = deviceToken; 
+        await existingUser.save();
+        return res.status(201).json({ message: 'Device token altered' });
       }
       else {
         const user = new User({
@@ -123,7 +125,6 @@ catch(e)
         });
         await user.save();
         return res.status(201).json({ message: 'Device token registered' });
-
       }
       
     }
@@ -131,10 +132,41 @@ catch(e)
       return res.status(400).json({message: e})
     }
   })
+
+  app.post('/serverside', async (req:any, res:any) => {
+    try {
+      // Set the topic to send the notification to
+const topic = 'random';
+
+// Construct the notification message
+const message = {
+  topic: topic,
+  notification: {
+    title: 'Notification Title',
+    body: 'Notification Body',
+  },
+};
+
+// Send the notification to the topic
+admin.messaging().send(message)
+  .then((response:any) => {
+    console.log('Successfully sent message:', response);
+  })
+  .catch((error:any) => {
+    console.error('Error sending message:', error);
+  });
+    }
+    catch(e)
+    {
+      return res.status(400).json({message: e})
+    }
+  })
   // Listen to Alchemy Notify webhook events
   app.listen(port, host, () => {
     console.log(`Example Alchemy Notify app listening at ${host}:${port}`);
   });
+
+
 }
 
 main();
