@@ -137,7 +137,7 @@ catch(e)
     try {
       // Set the topic to send the notification to
 const topic = 'random';
-const { title, body } = req.body
+const { title, body } = req.query
 // Construct the notification message
 const message = {
   topic: topic,
