@@ -13,6 +13,17 @@ admin.initializeApp({
 
 });
 
+const senderMessages = [
+  "Congratulations! You just sent a payment and made someone's day (and wallet) a little bit happier! We hope you didn't accidentally send it to your ex or that Nigerian prince who keeps emailing you",
+  "You did it! You managed to pay for something without getting lost in a labyrinth of online forms and security questions. Celebrate with a victory dance!",
+  "Attention! Your payment has been sent faster than a cheetah chasing its prey! Don't worry, it's not a mistake - you just couldn't bear to hold onto your money any longer. Now go forth and spend it like a boss"
+]
+
+function getRandomInt(min:number, max:number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 
 const mongoose = require('mongoose')
@@ -54,14 +65,17 @@ db.once('open', () => console.log('Connected to mongoose'))
       verify: addAlchemyContextToRequest,
     })
   );
+
   app.use(validateAlchemySignature(signingKey));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   // Register handler for Alchemy Notify webhook events
   // TODO: update to your own webhook path
-  app.post("/webhook", async (req, res) => {
+  app.post("/webhook", async (req:any, res:any) => {
+    
     try {
     const webhookEvent = req.body;
+
     // Do stuff with with webhook event here!
     console.log(`Processing webhook event id: ${webhookEvent.id}`);
     const { fromAddress } = webhookEvent.event.activity[0];
@@ -71,16 +85,32 @@ db.once('open', () => console.log('Connected to mongoose'))
     const response = await axios.get(`https://api-testnet.polygonscan.com/api?module=account&action=tokentx&contractaddress=0xA3C957f5119eF3304c69dBB61d878798B3F239D9&address=${fromAddress}&page=1&offset=1&sort=desc&apikey=26UDEN3Z37KX5V7PS9UMGHU11WAJ38RZ57`)
     const toAddress = response.data.result[0].to
     const toUser = await User.findOne({walletAddress:toAddress})
+
+    let senderName = fromAddress, receiverName = toAddress;
     // fetch('https://api-testnet.polygonscan.com/api?module=account&action=tokentx&contractaddress=0xA3C957f5119eF3304c69dBB61d878798B3F239D9&address=0x1a2EAF515a6ca05bfab9bf3d9850ea29e5C7882E&page=1&offset=1&sort=desc&apikey=26UDEN3Z37KX5V7PS9UMGHU11WAJ38RZ57')
       console.log(fromUser + " " + toUser)
+      const senderResponse = await axios.get(`https://user.api.xade.finance/polygon?address=${fromAddress.toLowerCase()}`)
+      if(senderResponse.status == 200)
+        senderName = senderResponse.data;
+
+      const receiverResponse = await axios.get(`https://user.api.xade.finance/polygon?address=${toAddress.toLowerCase()}`)
+      if(receiverResponse.status == 200)
+        receiverName = senderResponse.data;
+
+    const receiverMessages = [
+      `Alert! Alert! ${senderName} has just bestowed upon you the grand sum of 0! You are now officially richer than your neighbor's cat who has been living off of premium canned food. Congratulations!`
+    ]
+
+  
     // Be sure to respond with 200 when you successfully process the event
     if(fromUser)
     {
+      
       console.log('how did we get here')
     const message = {
       notification: {
-        title: 'New Transaction',
-        body: `You have sent a new transaction to ${toUser}`
+        title: 'New Transaction sent',
+        body: senderMessages[getRandomInt(0, 2)]
       },
       token: fromUser.deviceToken
     };
@@ -94,8 +124,8 @@ db.once('open', () => console.log('Connected to mongoose'))
     // Be sure to respond with 200 when you successfully process the event
     const message2 = {
       notification: {
-        title: 'New Transaction',
-        body: `You have received a new transaction to ${fromUser}`
+        title: 'New Transaction received',
+        body: receiverMessages[0]
       },
       token: toUser.deviceToken
     };
