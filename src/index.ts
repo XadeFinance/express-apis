@@ -41,12 +41,14 @@ import {
   validateAlchemySignature,
   AlchemyWebhookEvent,
 } from "./webhooksUtil";
+// import { send } from "process";
 
 async function main(): Promise<void> {
   const app = express();
   mongoose.connect("mongodb://127.0.0.1:27017/devicetokens", {
     useNewUrlParser: true,
 })
+
 setDefaultEnvVar("DATABASE_URL", "mongodb://127.0.0.1:27017/devicetokens");
 
 const db = mongoose.connection
@@ -102,7 +104,9 @@ db.once('open', () => console.log('Connected to mongoose'))
         console.log(e)
       }
     const receiverMessages = [
-      `Alert! Alert! ${senderName} has just bestowed upon you the grand sum of 0! You are now officially richer than your neighbor's cat who has been living off of premium canned food. Congratulations!`
+      `Alert! Alert! ${senderName} has just bestowed upon you the grand sum of 0! You are now officially richer than your neighbor's cat who has been living off of premium canned food. Congratulations!`,
+      `Woohoo! You've just received a payment of ${0} from ${senderName}, who clearly understands the value of your awesomeness. Time to celebrate with a victory dance and maybe a little online shopping spree (responsibly, of course). Thanks, ${senderName}, you're the real MVP!`,
+      
     ]
 
   
@@ -149,9 +153,13 @@ catch(e)
       const { walletAddress, deviceToken } = req.body; 
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) { 
+        if(deviceToken == existingUser.deviceToken)
+          return res.status(201).json({ message: 'No change' });
+
         existingUser.deviceToken = deviceToken; 
         await existingUser.save();
-        return res.status(201).json({ message: 'Device token altered' });
+        
+          return res.status(201).json({ message: 'Device token altered' });
       }
       else {
         const user = new User({
@@ -170,12 +178,11 @@ catch(e)
   app.post('/serverside', async (req:any, res:any) => {
     try {
       // Set the topic to send the notification to
-const topic = 'random';
-const { title, body, key } = req.body
+const { title, body, key, os } = req.body
 // Construct the notification message
 if(key != getRequiredEnvVar("KEY"))  return res.status(400).json({ message: 'Wrong key' });
 const message = {
-  topic: topic,
+  topic: os,
   notification: {
     
     title: title,
