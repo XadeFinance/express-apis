@@ -15,11 +15,18 @@ export function isValidSignatureForAlchemyRequest(
   request: AlchemyRequest,
   signingKey: string
 ): boolean {
-  return isValidSignatureForStringBody(
-    request.alchemy.rawBody,
-    request.alchemy.signature,
-    signingKey
-  );
+  const requestBody = request.method === 'GET' ? '' : request.body;
+  const rawBody = requestBody.toString();
+  
+  if (request.alchemy.hasOwnProperty('signature') && request.alchemy.hasOwnProperty('rawBody')) {
+    return isValidSignatureForStringBody(
+      rawBody,
+      request.alchemy.signature,
+      signingKey
+    );
+  } else {
+    return false;
+  }
 }
 
 export function isValidSignatureForStringBody(

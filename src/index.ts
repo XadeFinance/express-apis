@@ -1,6 +1,8 @@
 import express from "express";
 import axios from 'axios';
 
+const shortid = require('shortid');
+
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccount.json");
@@ -30,10 +32,13 @@ const mongoose = require('mongoose')
 
 const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
-  deviceToken: { type: String, required: true, unique: true },
+  deviceToken: [{ type: String, required: true, unique: true }],
+  points: { type: Number, default: 0 },
+  shortid: { type: String, default: shortid.generate}
 });
 
 const User = mongoose.model('devicetoken', DeviceTokenSchema);
+
 
 import { getRequiredEnvVar, setDefaultEnvVar } from "./envHelpers";
 import {
@@ -62,13 +67,13 @@ db.once('open', () => console.log('Connected to mongoose'))
   const host = getRequiredEnvVar("HOST");
   const signingKey = getRequiredEnvVar("SIGNING_KEY");
   // Middleware needed to validate the alchemy signature
-  app.use(
-    express.json({
-      verify: addAlchemyContextToRequest,
-    })
-  );
+  // app.use(
+  //   express.json({
+  //     verify: addAlchemyContextToRequest,
+  //   })
+  // );
 
-  app.use(validateAlchemySignature(signingKey));
+  // app.use(validateAlchemySignature(signingKey));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   // Register handler for Alchemy Notify webhook events
@@ -104,7 +109,7 @@ db.once('open', () => console.log('Connected to mongoose'))
         console.log(e)
       }
     const receiverMessages = [
-      `Alert! Alert! ${senderName} has just bestowed upon you the grand sum of 0! You are now officially richer than your neighbor's cat who has been living off of premium canned food. Congratulations!`,
+      `Alert! Alert! ${senderName} has just bestowed upon you the grand sum of ${0}. You are now officially richer than your neighbor's cat who has been living off of premium canned food. Congratulations!`,
       `Woohoo! You've just received a payment of ${0} from ${senderName}, who clearly understands the value of your awesomeness. Time to celebrate with a victory dance and maybe a little online shopping spree (responsibly, of course). Thanks, ${senderName}, you're the real MVP!`,
       
     ]
@@ -113,6 +118,7 @@ db.once('open', () => console.log('Connected to mongoose'))
     // Be sure to respond with 200 when you successfully process the event
     if(fromUser)
     {
+      for(let i = 0; i < fromUser.deviceToken.length; i++) {
       
       console.log('how did we get here')
     const message = {
@@ -120,14 +126,15 @@ db.once('open', () => console.log('Connected to mongoose'))
         title: 'New Transaction sent',
         body: senderMessages[getRandomInt(0, 2)]
       },
-      token: fromUser.deviceToken
+      token: fromUser.deviceToken[i]
     };
     const huh = await admin.messaging().send(message);
     console.log(huh)
   }
+  }
     if(toUser)
     {
-
+      for(let i = 0; i < fromUser.deviceToken.length; i++) {
       console.log(toUser.deviceToken)
     // Be sure to respond with 200 when you successfully process the event
     const message2 = {
@@ -141,6 +148,7 @@ db.once('open', () => console.log('Connected to mongoose'))
     
     console.log(huh2)
   }
+  }
     res.send("Alchemy Notify is the best!");
  } 
 catch(e)
@@ -153,10 +161,9 @@ catch(e)
       const { walletAddress, deviceToken } = req.body; 
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) { 
-        if(deviceToken == existingUser.deviceToken)
-          return res.status(201).json({ message: 'No change' });
+        
 
-        existingUser.deviceToken = deviceToken; 
+        existingUser.deviceToken.push(deviceToken); 
         await existingUser.save();
         
           return res.status(201).json({ message: 'Device token altered' });
@@ -190,6 +197,17 @@ const message = {
   },
 };
 
+// Redirect to the app with the referral code
+app.get('/refer/:referralCode', (req, res) => {
+  const { referralCode } = req.params;
+
+  // Validate the referral code and retrieve the user record from the database
+  // ...
+
+  // Redirect to the app with the referral code as a query parameter
+  res.redirect(`https://yourapp.com?referralCode=${referralCode}`);
+});
+
 // Send the notification to the topic
 admin.messaging().send(message)
   .then((response:any) => {
@@ -206,6 +224,13 @@ admin.messaging().send(message)
       return res.status(400).json({message: e})
     }
   })
+
+  app.get('/redirect', (req, res) => {
+    res.redirect('https://www.example.com');
+  });
+
+  app.get('')
+  
   // Listen to Alchemy Notify webhook events
   app.listen(port, host, () => {
     console.log(`Example Alchemy Notify app listening at ${host}:${port}`);
