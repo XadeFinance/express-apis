@@ -5,9 +5,20 @@ var admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccount.json");
 
-const bodyParser = require('body-parser');
-import { nanoid } from 'nanoid'
+var bodyParser = require('body-parser');
 
+function generateShortId(): string {
+  const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const idLength = 10;
+  let id = '';
+
+  for (let i = 0; i < idLength; i++) {
+    const randomIndex = Math.floor(Math.random() * alphabet.length);
+    id += alphabet[randomIndex];
+  }
+
+  return id;
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -20,11 +31,6 @@ const senderMessages = [
   "Attention! Your payment has been sent faster than a cheetah chasing its prey! Don't worry, it's not a mistake - you just couldn't bear to hold onto your money any longer. Now go forth and spend it like a boss"
 ]
 
-function getRandomInt(min:number, max:number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 const mongoose = require('mongoose')
 
@@ -32,7 +38,7 @@ const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
   deviceToken: [{ type: String, required: true, unique: true }],
   points: { type: Number, default: 0 },
-  shortid: { type: String, default: () => {nanoid(11)}}
+  shortid: { type: String, default: () => {generateShortId()}}
 });
 
 const User = mongoose.model('devicetoken', DeviceTokenSchema);
