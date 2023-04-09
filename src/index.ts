@@ -1,13 +1,12 @@
 import express from "express";
 import axios from 'axios';
 
-const shortid = require('shortid');
-
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccount.json");
 
 const bodyParser = require('body-parser');
+import { nanoid } from 'nanoid'
 
 
 admin.initializeApp({
@@ -27,14 +26,13 @@ function getRandomInt(min:number, max:number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
 const mongoose = require('mongoose')
 
 const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
   deviceToken: [{ type: String, required: true, unique: true }],
   points: { type: Number, default: 0 },
-  shortid: { type: String, default: shortid.generate}
+  shortid: { type: String, default: () => {nanoid(11)}}
 });
 
 const User = mongoose.model('devicetoken', DeviceTokenSchema);
