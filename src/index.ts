@@ -6,7 +6,11 @@ var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccount.json");
 
 var bodyParser = require('body-parser');
-
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 function generateShortId(): string {
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const idLength = 10;
@@ -82,6 +86,27 @@ db.once('open', () => console.log('Connected to mongoose'))
   app.use(bodyParser.json());
   // Register handler for Alchemy Notify webhook events
   // TODO: update to your own webhook path
+  app.post('/points', (req, res) => {
+    const { userId, transactionAmount } = req.body;
+  
+    User.findOne({walletAddress:userId}, (err, user) => {
+      if (err) {
+        res.status(500).send(err);
+      } else if (!user) {
+        res.status(404).send('User not found');
+      } else {
+        const newPoints = user.points + transactionAmount * 20;
+        user.updateOne({ points: newPoints }, (err, raw) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.status(200).send({ points: newPoints });
+          }
+        });
+      }
+    });
+  });
+  
   app.post("/webhook", async (req:any, res:any) => {
     
     try {
@@ -166,7 +191,7 @@ catch(e)
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) { 
         
-
+        if(!existingUser.deviceToken.includes(deviceToken))
         existingUser.deviceToken.push(deviceToken); 
         await existingUser.save();
         
