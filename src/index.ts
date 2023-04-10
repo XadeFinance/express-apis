@@ -86,25 +86,22 @@ db.once('open', () => console.log('Connected to mongoose'))
   app.use(bodyParser.json());
   // Register handler for Alchemy Notify webhook events
   // TODO: update to your own webhook path
-  app.post('/points', (req, res) => {
+  app.post('/points',async (req, res) => {
     const { userId, transactionAmount } = req.body;
   
-    User.findOne({walletAddress:userId}, (err, user) => {
-      if (err) {
-        res.status(500).send(err);
-      } else if (!user) {
+    try {
+      const user = await User.findOne({walletAddress:userId});
+      if (!user) {
         res.status(404).send('User not found');
       } else {
         const newPoints = user.points + transactionAmount * 20;
-        user.updateOne({ points: newPoints }, (err, raw) => {
-          if (err) {
-            res.status(500).send(err);
-          } else {
-            res.status(200).send({ points: newPoints });
-          }
-        });
+        await user.updateOne({ points: newPoints });
+        await user.save();
+        res.status(200).send({ points: newPoints });
       }
-    });
+    } catch (err) {
+      res.status(500).send(err);
+    }
   });
   
   app.post("/webhook", async (req:any, res:any) => {
