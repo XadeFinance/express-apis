@@ -93,7 +93,7 @@ db.once('open', () => console.log('Connected to mongoose'))
     try {
       const user = await User.findOne({walletAddress:userId});
       if (!user) {
-        res.status(404).send('User not found');
+        res.status(404).send({points:'User not found'});
       } else {
         const newPoints = user.points + transactionAmount * 20;
         await user.updateOne({ points: newPoints });
