@@ -42,7 +42,8 @@ const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
   deviceToken: [{ type: String, required: true, unique: true }],
   points: { type: Number, default: 0 },
-  shortid: { type: String, default: () => {generateShortId()}}
+  shortid: { type: String, default: () => {generateShortId()}},
+  referrals: {type:String, default: 0}
 });
 
 const User = mongoose.model('devicetoken', DeviceTokenSchema);
@@ -88,7 +89,7 @@ db.once('open', () => console.log('Connected to mongoose'))
   // TODO: update to your own webhook path
   app.post('/points',async (req, res) => {
     const { userId, transactionAmount } = req.body;
-  
+    
     try {
       const user = await User.findOne({walletAddress:userId});
       if (!user) {
@@ -223,16 +224,7 @@ const message = {
   },
 };
 
-// Redirect to the app with the referral code
-app.get('/refer/:referralCode', (req, res) => {
-  const { referralCode } = req.params;
 
-  // Validate the referral code and retrieve the user record from the database
-  // ...
-
-  // Redirect to the app with the referral code as a query parameter
-  res.redirect(`https://yourapp.com?referralCode=${referralCode}`);
-});
 
 // Send the notification to the topic
 admin.messaging().send(message)
@@ -254,8 +246,21 @@ admin.messaging().send(message)
   app.get('/redirect', (req, res) => {
     res.redirect('https://www.example.com');
   });
+  
+  // Redirect to the app with the referral code
+app.get('/refer/:referralCode', async (req, res) => {
+  const { referralCode } = req.params;
+  const userTo =await User.findOne({walletAddress: referralCode})
+  const newPoints = userTo.points + 300;
+  await userTo.updateOne({ points: newPoints });
+  await userTo.save();
+  // Validate the referral code and retrieve the user record from the database
+  // ...
 
-  app.get('')
+  // Redirect to the app with the referral code as a query parameter
+  res.redirect(`https://onelink.to/weupf9`);
+});
+
   
   // Listen to Alchemy Notify webhook events
   app.listen(port, host, () => {
