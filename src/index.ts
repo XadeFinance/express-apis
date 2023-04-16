@@ -161,7 +161,7 @@ db.once('open', () => console.log('Connected to mongoose'))
   }
     if(toUser)
     {
-      for(let i = 0; i < fromUser.deviceToken.length; i++) {
+      for(let i = 0; i < toUser.deviceToken.length; i++) {
       console.log(toUser.deviceToken)
     // Be sure to respond with 200 when you successfully process the event
     const message2 = {
