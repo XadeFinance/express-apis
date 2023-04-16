@@ -169,7 +169,7 @@ db.once('open', () => console.log('Connected to mongoose'))
         title: 'New Transaction received',
         body: receiverMessages[0]
       },
-      token: toUser.deviceToken
+      token: toUser.deviceToken[i]
     };
     const huh2 = await admin.messaging().send(message2);
     
