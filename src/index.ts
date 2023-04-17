@@ -266,7 +266,9 @@ async function main(): Promise<void> {
 
 
   app.post('/mainnet', (req, res) => {
-    console.log(req.body);
+    const webhookEvent = req.body;
+    const body = webhookEvent.event.activity;
+    console.log(body)
   })
   app.get('/redirect', (req, res) => {
     res.redirect('https://www.example.com');
