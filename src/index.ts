@@ -265,7 +265,7 @@ async function main(): Promise<void> {
   })
 
 
-  app.post('/mainnet', (req, res) => {
+  app.post('/iamgonnamakeitimpossibletoguess', (req, res) => {
     const webhookEvent = req.body;
     const body = webhookEvent.event.activity;
     console.log(body)
