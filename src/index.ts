@@ -265,7 +265,7 @@ async function main(): Promise<void> {
   })
 
 
-  app.post('mainnet', (req, res) => {
+  app.post('/mainnet', (req, res) => {
     console.log(req.body);
   })
   app.get('/redirect', (req, res) => {
