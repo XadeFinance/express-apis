@@ -5,6 +5,19 @@ var admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccount.json");
 
+// Setup: npm install alchemy-sdk
+// Github: https://github.com/alchemyplatform/alchemy-sdk-js
+import { Alchemy, Network } from "alchemy-sdk";
+
+// authToken is required to use Notify APIs. Found on the top right corner of
+// https://dashboard.alchemy.com/notify.
+const settings = {
+  authToken: "a5g3Pe81wgCao0FNOLreE1qyo5LFhTRd",
+  network: Network.POLYGONZKEVM_MAINNET, // Replace with your network.
+};
+
+
+
 var bodyParser = require('body-parser');
 function getRandomInt(min: number, max: number) {
   min = Math.ceil(min);
@@ -185,7 +198,18 @@ catch(e)
 }});
   app.post('/registerDevice', async (req:any, res:any) => {
     try {
+      const alchemy = new Alchemy(settings);
+
       const { walletAddress, deviceToken } = req.body; 
+
+      // Updating Address Activity Webhook: add/remove addresses
+      await alchemy.notify.updateWebhook("wh_c96f858nxr2hlq2n", {
+        addAddresses: [
+          walletAddress,
+        ],
+        removeAddresses: [],
+      });
+
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) { 
         
