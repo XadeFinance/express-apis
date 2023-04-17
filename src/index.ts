@@ -82,7 +82,7 @@ async function main(): Promise<void> {
   db.on('error', (error: any) => console.error(error))
   db.once('open', () => console.log('Connected to mongoose'))
   setDefaultEnvVar("PORT", "4000");
-  setDefaultEnvVar("HOST", "127.0.0.1");
+  setDefaultEnvVar("HOST", "0.0.0.0");
   setDefaultEnvVar("SIGNING_KEY", "whsec_O8iFY5eJDnTuNxUF9KxesVkW");
   setDefaultEnvVar("KEY", "")
   const port = Number(getRequiredEnvVar("PORT"));
@@ -118,7 +118,7 @@ async function main(): Promise<void> {
     }
   });
 
-  app.post("/webhook", async (req: any, res: any) => {
+  app.post("/8Vdg7FJXlJ", async (req: any, res: any) => {
 
     try {
       const webhookEvent = req.body;
@@ -264,8 +264,21 @@ async function main(): Promise<void> {
     }
   })
 
+const CryptoJS = require('crypto-js');
 
-  app.post('/iamgonnamakeitimpossibletoguess', (req, res) => {
+
+app.post('/decrypt', (req, res) => {
+  const { encryptedValue } = req.body;
+  const bytes = CryptoJS.AES.decrypt(encryptedValue, '4a2f9d7e');
+  const decryptedValue = bytes.toString(CryptoJS.enc.Utf8);
+  console.log(`Decrypted value: ${decryptedValue}`);
+  res.json({ success: true, decryptedValue });
+});
+
+
+
+
+  app.post('/uz3E5U4jLu', (req, res) => {
     const webhookEvent = req.body;
     const body = webhookEvent.event.activity;
     console.log(body)
