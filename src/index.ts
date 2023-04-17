@@ -81,7 +81,7 @@ async function main(): Promise<void> {
   const db = mongoose.connection
   db.on('error', (error: any) => console.error(error))
   db.once('open', () => console.log('Connected to mongoose'))
-  setDefaultEnvVar("PORT", "3000");
+  setDefaultEnvVar("PORT", "4000");
   setDefaultEnvVar("HOST", "127.0.0.1");
   setDefaultEnvVar("SIGNING_KEY", "whsec_O8iFY5eJDnTuNxUF9KxesVkW");
   setDefaultEnvVar("KEY", "")
