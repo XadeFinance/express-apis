@@ -318,6 +318,7 @@ async function main(): Promise<void> {
     );
   
     console.log(tx)
+      res.status(200).send(tx);
     }
     catch(e)
     {
