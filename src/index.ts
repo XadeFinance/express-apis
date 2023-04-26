@@ -287,15 +287,18 @@ async function main(): Promise<void> {
       // const newMainPoints = userTo.testPoints + 300;
       await userTo.updateOne({ points: newPoints});
       await userTo.save();
+         // Validate the referral code and retrieve the user record from the database
+    // ...
+
+    // Redirect to the app with the referral code as a query parameter
+    res.set('Content-Type', 'text/html');
+  res.redirect(301, 'https://onelink.to/weupf9');
     }
     catch (e) {
       res.send(500)
     }
-    // Validate the referral code and retrieve the user record from the database
-    // ...
-
-    // Redirect to the app with the referral code as a query parameter
-    res.redirect(`https://onelink.to/weupf9`);
+ 
+ 
   });
 
   app.post('/faucet', async (req:any, res:any) => {
