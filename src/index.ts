@@ -279,7 +279,7 @@ async function main(): Promise<void> {
   });
 
   // Redirect to the app with the referral code
-  app.get('/:referralCode', async (req, res) => {
+  app.get('/refer/:referralCode', async (req, res) => {
     try {
       const { referralCode } = req.params;
       const userTo = await User.findOne({ walletAddress: referralCode.toLowerCase() })
@@ -291,7 +291,7 @@ async function main(): Promise<void> {
     // ...
 
     // Redirect to the app with the referral code as a query parameter
-    res.set('Content-Type', 'text/html');
+//     res.set('Content-Type', 'text/html');
   res.redirect(301, 'https://onelink.to/weupf9');
     }
     catch (e) {
