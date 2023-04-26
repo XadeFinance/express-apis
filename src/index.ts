@@ -221,7 +221,7 @@ async function main(): Promise<void> {
       }
       else {
         const user = new User({
-          walletAddress, deviceToken
+           walletAddress, deviceToken, points: 0, referrals: '0'
         });
         await user.save();
         return res.status(201).json({ message: 'Device token registered' });
