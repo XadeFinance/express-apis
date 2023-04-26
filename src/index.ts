@@ -291,8 +291,7 @@ async function main(): Promise<void> {
     // ...
 
     // Redirect to the app with the referral code as a query parameter
-//     res.set('Content-Type', 'text/html');
-  res.redirect(301, 'https://onelink.to/weupf9');
+    res.set('location', 'https://onelink.to/weupf9');
     }
     catch (e) {
       res.send(500)
