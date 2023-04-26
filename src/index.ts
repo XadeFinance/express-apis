@@ -1,20 +1,22 @@
 import express from "express";
 import axios from 'axios';
-
+import * as dotenv from 'dotenv';
 var admin = require("firebase-admin");
-
+let contractAbi = require('./contractAbi')
 var serviceAccount = require("./serviceAccount.json");
-
+// const contractAbi = require('./contractAbi')
 // Setup: npm install alchemy-sdk
 // Github: https://github.com/alchemyplatform/alchemy-sdk-js
 import { Alchemy, Network } from "alchemy-sdk";
-
+import{ ethers }from 'ethers'
 // authToken is required to use Notify APIs. Found on the top right corner of
 // https://dashboard.alchemy.com/notify.
 const settings = {
   authToken: "a5g3Pe81wgCao0FNOLreE1qyo5LFhTRd",
   network: Network.POLYGONZKEVM_MAINNET, // Replace with your network.
 };
+
+dotenv.config()
 
 
 
@@ -118,7 +120,7 @@ async function main(): Promise<void> {
     }
   });
 
-  app.post("/8Vdg7FJXlJ", async (req: any, res: any) => {
+  app.post("/webhook", async (req: any, res: any) => {
 
     try {
       const webhookEvent = req.body;
@@ -264,21 +266,8 @@ async function main(): Promise<void> {
     }
   })
 
-const CryptoJS = require('crypto-js');
 
-
-app.post('/decrypt', (req, res) => {
-  const { encryptedValue } = req.body;
-  const bytes = CryptoJS.AES.decrypt(encryptedValue, '4a2f9d7e');
-  const decryptedValue = bytes.toString(CryptoJS.enc.Utf8);
-  console.log(`Decrypted value: ${decryptedValue}`);
-  res.json({ success: true, decryptedValue });
-});
-
-
-
-
-  app.post('/uz3E5U4jLu', (req, res) => {
+  app.post('/mainnet', (req, res) => {
     const webhookEvent = req.body;
     const body = webhookEvent.event.activity;
     console.log(body)
@@ -288,12 +277,13 @@ app.post('/decrypt', (req, res) => {
   });
 
   // Redirect to the app with the referral code
-  app.get('/refer/:referralCode', async (req, res) => {
+  app.get('/:referralCode', async (req, res) => {
     try {
       const { referralCode } = req.params;
       const userTo = await User.findOne({ walletAddress: referralCode.toLowerCase() })
-      const newPoints = userTo.points + 300;
-      await userTo.updateOne({ points: newPoints });
+      const newPoints = userTo.points + 50;
+      // const newMainPoints = userTo.testPoints + 300;
+      await userTo.updateOne({ points: newPoints});
       await userTo.save();
     }
     catch (e) {
@@ -306,7 +296,34 @@ app.post('/decrypt', (req, res) => {
     res.redirect(`https://onelink.to/weupf9`);
   });
 
-
+  app.post('/faucet', async (req:any, res:any) => {
+    try {
+    const provider = new ethers.JsonRpcProvider(
+      "https://rpc-mumbai.maticvigil.com"
+    );
+      
+    const wallet = new ethers.Wallet(
+      "d",
+      provider
+    );
+  
+    let contract = new ethers.Contract(
+      "0x27B3a77e22B8A9e3f0e003E73b2245dc6A3DC666",
+      contractAbi,
+      wallet
+    );
+  
+    let tx = await contract.getTestTokens(
+      req.body.address,
+    );
+  
+    console.log(tx)
+    }
+    catch(e)
+    {
+      res.status(404).send(e)
+    }
+  })
   // Listen to Alchemy Notify webhook events
   app.listen(port, host, () => {
     console.log(`Example Alchemy Notify app listening at ${host}:${port}`);
