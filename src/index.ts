@@ -303,7 +303,7 @@ async function main(): Promise<void> {
     );
       
     const wallet = new ethers.Wallet(
-      "d",
+      process.env.PRIVATE_KEY,
       provider
     );
   
