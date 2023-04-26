@@ -273,7 +273,9 @@ async function main(): Promise<void> {
     console.log(body)
   })
   app.get('/redirect', (req, res) => {
-    res.redirect('https://www.example.com');
+    res.set('Content-Type', 'text/html');
+  res.redirect(301, 'https://www.example.com');
+
   });
 
   // Redirect to the app with the referral code
