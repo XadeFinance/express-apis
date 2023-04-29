@@ -55,7 +55,7 @@ const mongoose = require('mongoose')
 
 const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
-  deviceToken: [{ type: String, required: true, unique: true }],
+  deviceToken: [{ type: String, required: true}],
   points: { type: Number, default: 0 },
   shortid: { type: String, default: () => { generateShortId() } },
   referrals: { type: String, default: 0 }
