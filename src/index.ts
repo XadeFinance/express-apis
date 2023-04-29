@@ -55,7 +55,7 @@ const mongoose = require('mongoose')
 
 const DeviceTokenSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true, unique: true },
-  deviceToken: [{ type: String, required: true, unique: true }],
+  deviceToken: [{ type: String, required: true}],
   points: { type: Number, default: 0 },
   shortid: { type: String, default: () => { generateShortId() } },
   referrals: { type: String, default: 0 }
@@ -223,7 +223,7 @@ async function main(): Promise<void> {
       }
       else {
         const user = new User({
-          walletAddress, deviceToken, points: 0, referrals: '0'
+           walletAddress, deviceToken:[deviceToken], points: 0, referrals: '0'
         });
         await user.save();
         return res.status(201).json({ message: 'Device token registered' });
@@ -275,11 +275,13 @@ async function main(): Promise<void> {
     console.log(body)
   })
   app.get('/redirect', (req, res) => {
-    res.redirect('https://www.example.com');
+    res.set('Content-Type', 'text/html');
+  res.redirect(301, 'https://www.example.com');
+
   });
 
   // Redirect to the app with the referral code
-  app.get('/:referralCode', async (req, res) => {
+  app.get('/refer/:referralCode', async (req, res) => {
     try {
       const { referralCode } = req.params;
       const userTo = await User.findOne({ walletAddress: referralCode.toLowerCase() })
@@ -287,15 +289,17 @@ async function main(): Promise<void> {
       // const newMainPoints = userTo.testPoints + 300;
       await userTo.updateOne({ points: newPoints});
       await userTo.save();
+         // Validate the referral code and retrieve the user record from the database
+    // ...
+
+    // Redirect to the app with the referral code as a query parameter
+    res.set('location', 'https://onelink.to/weupf9');
     }
     catch (e) {
       res.send(500)
     }
-    // Validate the referral code and retrieve the user record from the database
-    // ...
-
-    // Redirect to the app with the referral code as a query parameter
-    res.redirect(`https://onelink.to/weupf9`);
+ 
+ 
   });
 
   app.post('/faucet', async (req:any, res:any) => {
@@ -305,7 +309,7 @@ async function main(): Promise<void> {
     );
       
     const wallet = new ethers.Wallet(
-      "d",
+      process.env.PRIVATE_KEY,
       provider
     );
   
@@ -320,6 +324,7 @@ async function main(): Promise<void> {
     );
   
     console.log(tx)
+      res.status(200).send(tx);
     }
     catch(e)
     {
