@@ -203,12 +203,14 @@ async function main(): Promise<void> {
       const { walletAddress, deviceToken } = req.body;
 
       // Updating Address Activity Webhook: add/remove addresses
+   
       await alchemy.notify.updateWebhook("wh_c96f858nxr2hlq2n", {
         addAddresses: [
           walletAddress,
         ],
         removeAddresses: [],
       });
+      
 
       const existingUser = await User.findOne({ walletAddress });
       if (existingUser) {
@@ -221,7 +223,7 @@ async function main(): Promise<void> {
       }
       else {
         const user = new User({
-          walletAddress, deviceToken
+          walletAddress, deviceToken, points: 0, referrals: '0'
         });
         await user.save();
         return res.status(201).json({ message: 'Device token registered' });
