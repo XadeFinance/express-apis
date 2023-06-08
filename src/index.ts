@@ -119,6 +119,30 @@ async function main(): Promise<void> {
       res.status(500).send(err);
     }
   });
+  
+    app.post('/updatePoints', async (req, res) => {
+    const { userId, increase, pointsChange } = req.body;
+
+    try {
+      let newPoints;
+      const user = await User.findOne({ walletAddress: userId });
+      if (!user) {
+        res.status(404).send({ points: 'User not found' });
+      } else {
+        if (increase) {
+        newPoints = user.points + pointsChange; 
+        }
+        else {
+        newPoints = user.points - pointsChange; 
+        }
+        await user.updateOne({ points: newPoints });
+        await user.save();
+        res.status(200).send({ points: newPoints });
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
 
   app.post("/webhook", async (req: any, res: any) => {
 
