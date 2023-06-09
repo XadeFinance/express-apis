@@ -123,17 +123,20 @@ async function main(): Promise<void> {
     app.post('/updatePoints', async (req, res) => {
     const { userId, increase, pointsChange } = req.body;
 
+    const increased = JSON.parse(increase);
+    const pointsChanged = JSON.parse(pointsChange);
+
     try {
       let newPoints;
       const user = await User.findOne({ walletAddress: userId });
       if (!user) {
         res.status(404).send({ points: 'User not found' });
       } else {
-        if (increase) {
-        newPoints = user.points + pointsChange; 
+        if (increased) {
+        newPoints = user.points + pointsChanged;
         }
         else {
-        newPoints = user.points - pointsChange; 
+        newPoints = user.points - pointsChanged;
         }
         await user.updateOne({ points: newPoints });
         await user.save();
