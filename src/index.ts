@@ -64,6 +64,8 @@ const DeviceTokenSchema = new mongoose.Schema({
 const User = mongoose.model('devicetoken', DeviceTokenSchema);
 
 
+
+
 import { getRequiredEnvVar, setDefaultEnvVar } from "./envHelpers";
 import {
   addAlchemyContextToRequest,
@@ -77,6 +79,16 @@ async function main(): Promise<void> {
   mongoose.connect("mongodb://127.0.0.1:27017/devicetokens", {
     useNewUrlParser: true,
   })
+  
+  const middleware = (req, res, next) => {
+  const apikey = req.headers['api-key'];
+
+  if (!correct || correct !== apiKey) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  next();
+};
 
   setDefaultEnvVar("DATABASE_URL", "mongodb://127.0.0.1:27017/devicetokens");
 
@@ -102,7 +114,7 @@ async function main(): Promise<void> {
   app.use(bodyParser.json());
   // Register handler for Alchemy Notify webhook events
   // TODO: update to your own webhook path
-  app.post('/points', async (req, res) => {
+  app.post('/points', middleware, async (req, res) => {
     const { userId, transactionAmount } = req.body;
 
     try {
@@ -120,7 +132,7 @@ async function main(): Promise<void> {
     }
   });
   
-    app.post('/updatePoints', async (req, res) => {
+    app.post('/updatePoints', middleware, async (req, res) => {
     const { userId, increase, pointsChange } = req.body;
 
     const increased = JSON.parse(increase);
@@ -223,7 +235,7 @@ async function main(): Promise<void> {
       res.send("error in try block")
     }
   });
-  app.post('/registerDevice', async (req: any, res: any) => {
+  app.post('/registerDevice', middleware, async (req: any, res: any) => {
     try {
       const alchemy = new Alchemy(settings);
 
@@ -262,7 +274,7 @@ async function main(): Promise<void> {
     }
   })
 
-  app.post('/serverside', async (req: any, res: any) => {
+  app.post('/serverside', middleware, async (req: any, res: any) => {
     try {
       // Set the topic to send the notification to
       const { title, body, key, os } = req.body
@@ -317,8 +329,6 @@ async function main(): Promise<void> {
       await userTo.updateOne({ points: newPoints});
       await userTo.save();
          // Validate the referral code and retrieve the user record from the database
-    // ...
-
     // Redirect to the app with the referral code as a query parameter
     res.set('location', 'https://onelink.to/weupf9');
     }
