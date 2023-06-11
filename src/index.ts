@@ -237,7 +237,7 @@ async function main(): Promise<void> {
       res.send("error in try block")
     }
   });
-  app.post('/registerDevice', middleware, async (req: any, res: any) => {
+  app.post('/registerDevice', async (req: any, res: any) => {
     try {
       const alchemy = new Alchemy(settings);
 
