@@ -81,7 +81,7 @@ async function main(): Promise<void> {
   })
   
   const middleware = (req, res, next) => {
-  const apikey = req.headers['api-key'];
+  const apiKey = req.headers['api-key'];
 
   if (!correct || correct !== apiKey) {
     return res.status(401).send({ error: 'Unauthorized' });
