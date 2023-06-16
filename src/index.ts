@@ -162,6 +162,26 @@ async function main(): Promise<void> {
     }
   });
 
+  
+    app.post('/referrals', middleware, async (req, res) => {
+    try {
+    const { code } = req.body;
+
+      let newPoints;
+      const user = await User.findOne({ walletAddress: code });
+      if (!user) {
+        res.status(404).send({ points: 'User not found' });
+      } else {
+        newPoints = user.points + 50;
+        await user.updateOne({ points: newPoints });
+        await user.save();
+        res.status(200).send({ points: newPoints });
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
   app.post("/webhook", async (req: any, res: any) => {
 
     try {
