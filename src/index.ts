@@ -135,9 +135,9 @@ async function main(): Promise<void> {
   });
   
     app.post('/updatePoints', middleware, async (req, res) => {
+    const { userId, increase, pointsChange } = req.body;
       
     try {
-    const { userId, increase, pointsChange } = req.body;
 
     const increased = JSON.parse(increase);
     const pointsChanged = JSON.parse(pointsChange);
@@ -164,9 +164,9 @@ async function main(): Promise<void> {
 
   
     app.post('/referrals', middleware, async (req, res) => {
-    try {
     const { code } = req.body;
-
+      
+    try {
       let newPoints;
       const user = await User.findOne({ walletAddress: code });
       if (!user) {
