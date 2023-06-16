@@ -135,12 +135,13 @@ async function main(): Promise<void> {
   });
   
     app.post('/updatePoints', middleware, async (req, res) => {
+      
+    try {
     const { userId, increase, pointsChange } = req.body;
 
     const increased = JSON.parse(increase);
     const pointsChanged = JSON.parse(pointsChange);
 
-    try {
       let newPoints;
       const user = await User.findOne({ walletAddress: userId });
       if (!user) {
